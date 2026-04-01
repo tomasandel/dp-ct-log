@@ -1,0 +1,5 @@
+node_modules/
+.claude/
+keys/
+log-list.json
+.env

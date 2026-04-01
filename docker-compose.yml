@@ -1,0 +1,52 @@
+services:
+  # ---- CompactLog instances ----
+  # All share the same image (built once).
+  # Attack instances: served to the victim (extension via Caddy).
+  # Public instances: served to monitors (localhost via Caddy).
+  # Each instance is configured via LOG_KEY_NAME env var (see .env).
+
+  compact-log-a-attack:
+    build: ./compact-log
+    environment:
+      LOG_KEY_NAME: ${LOG_A_KEY_NAME}
+    volumes:
+      - ./keys:/app/certs:ro
+      - log-a-attack-data:/data
+    expose:
+      - "8080"
+
+  compact-log-a-public:
+    build: ./compact-log
+    environment:
+      LOG_KEY_NAME: ${LOG_A_KEY_NAME}
+    volumes:
+      - ./keys:/app/certs:ro
+      - log-a-public-data:/data
+    expose:
+      - "8080"
+
+  compact-log-b-attack:
+    build: ./compact-log
+    environment:
+      LOG_KEY_NAME: ${LOG_B_KEY_NAME}
+    volumes:
+      - ./keys:/app/certs:ro
+      - log-b-attack-data:/data
+    expose:
+      - "8080"
+
+  compact-log-b-public:
+    build: ./compact-log
+    environment:
+      LOG_KEY_NAME: ${LOG_B_KEY_NAME}
+    volumes:
+      - ./keys:/app/certs:ro
+      - log-b-public-data:/data
+    expose:
+      - "8080"
+
+volumes:
+  log-a-attack-data:
+  log-a-public-data:
+  log-b-attack-data:
+  log-b-public-data:
