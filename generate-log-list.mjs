@@ -6,8 +6,8 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 
-const ROOT = path.join(import.meta.dirname, '..');
-const CA_DIR = path.join(ROOT, 'ca');
+import { fileURLToPath } from 'node:url';
+const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 
 function getArg(name, fallback) {
   const eq = process.argv.find(a => a.startsWith(`--${name}=`));
@@ -19,9 +19,11 @@ function getArg(name, fallback) {
 
 const LOG_A_URL = getArg('log-a-url', 'https://loga.jvgc-a.com');
 const LOG_B_URL = getArg('log-b-url', 'https://logb.jvgc-a.com');
+const LOG_A_PUB = getArg('log-a-pub', path.join(SCRIPT_DIR, '..', 'log-a', 'keys', 'log-a.pub'));
+const LOG_B_PUB = getArg('log-b-pub', path.join(SCRIPT_DIR, '..', 'log-b', 'keys', 'log-b.pub'));
 
-function loadLogInfo(name) {
-  const pubPem = fs.readFileSync(path.join(CA_DIR, `${name}.pub`), 'utf8');
+function loadLogInfo(pubPath) {
+  const pubPem = fs.readFileSync(pubPath, 'utf8');
   const pubDer = crypto.createPublicKey(pubPem).export({ type: 'spki', format: 'der' });
   return {
     logId: crypto.createHash('sha256').update(pubDer).digest().toString('base64'),
@@ -29,8 +31,8 @@ function loadLogInfo(name) {
   };
 }
 
-const logA = loadLogInfo('log-a');
-const logB = loadLogInfo('log-b');
+const logA = loadLogInfo(LOG_A_PUB);
+const logB = loadLogInfo(LOG_B_PUB);
 
 // Fetch Google's official log list
 const GOOGLE_LOG_LIST = 'https://www.gstatic.com/ct/log_list/v3/log_list.json';
@@ -78,7 +80,7 @@ const merged = {
   ],
 };
 
-const outPath = path.join(import.meta.dirname, 'log-list.json');
+const outPath = path.join(SCRIPT_DIR, 'log-list.json');
 fs.writeFileSync(outPath, JSON.stringify(merged, null, 2));
 console.log(`\nWrote ${outPath}`);
 console.log(`  Log A: id=${logA.logId.slice(0, 20)}... url=${LOG_A_URL}/`);
