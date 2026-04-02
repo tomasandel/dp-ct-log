@@ -7,9 +7,9 @@ RUN apt-get update && apt-get install -y cmake pkg-config libssl-dev python3
 RUN git clone --depth 1 https://github.com/Barre/compact_log.git /build
 WORKDIR /build
 
-# Apply skip_inclusion patch
-COPY patch_skip_inclusion.py .
-RUN python3 patch_skip_inclusion.py
+# Apply patches
+COPY patch_skip_inclusion.py patch_remove_leaf_index.py ./
+RUN python3 patch_skip_inclusion.py && python3 patch_remove_leaf_index.py
 
 # Build release binary
 RUN cargo build --release
