@@ -1,6 +1,6 @@
 // Generates a merged CT log list (Google's public logs + attack simulation logs).
 // Output: ct-log/log-list.json — served as a static file by Caddy.
-// Usage: node ct-log/generate-log-list.mjs [--base-url https://ct.jvgc-a.com]
+// Usage: node ct-log/generate-log-list.mjs [--log-a-url https://loga.jvgc-a.com] [--log-b-url https://logb.jvgc-a.com]
 
 import crypto from 'node:crypto';
 import fs from 'node:fs';
@@ -8,9 +8,17 @@ import path from 'node:path';
 
 const ROOT = path.join(import.meta.dirname, '..');
 const CA_DIR = path.join(ROOT, 'ca');
-const BASE_URL = process.argv.find(a => a.startsWith('--base-url='))?.split('=')[1]
-  || process.argv[process.argv.indexOf('--base-url') + 1]
-  || 'https://ct.jvgc-a.com';
+
+function getArg(name, fallback) {
+  const eq = process.argv.find(a => a.startsWith(`--${name}=`));
+  if (eq) return eq.split('=')[1];
+  const idx = process.argv.indexOf(`--${name}`);
+  if (idx !== -1 && process.argv[idx + 1]) return process.argv[idx + 1];
+  return fallback;
+}
+
+const LOG_A_URL = getArg('log-a-url', 'https://loga.jvgc-a.com');
+const LOG_B_URL = getArg('log-b-url', 'https://logb.jvgc-a.com');
 
 function loadLogInfo(name) {
   const pubPem = fs.readFileSync(path.join(CA_DIR, `${name}.pub`), 'utf8');
@@ -50,7 +58,7 @@ const merged = {
       logs: [{
         log_id: logA.logId,
         key: logA.key,
-        url: `${BASE_URL}/log-a/`,
+        url: `${LOG_A_URL}/`,
         mmd: 86400,
         description: 'Attack Log A',
         state: { usable: { timestamp: new Date().toISOString() } },
@@ -61,7 +69,7 @@ const merged = {
       logs: [{
         log_id: logB.logId,
         key: logB.key,
-        url: `${BASE_URL}/log-b/`,
+        url: `${LOG_B_URL}/`,
         mmd: 86400,
         description: 'Attack Log B',
         state: { usable: { timestamp: new Date().toISOString() } },
@@ -73,6 +81,6 @@ const merged = {
 const outPath = path.join(import.meta.dirname, 'log-list.json');
 fs.writeFileSync(outPath, JSON.stringify(merged, null, 2));
 console.log(`\nWrote ${outPath}`);
-console.log(`  Log A: id=${logA.logId.slice(0, 20)}... url=${BASE_URL}/log-a/`);
-console.log(`  Log B: id=${logB.logId.slice(0, 20)}... url=${BASE_URL}/log-b/`);
+console.log(`  Log A: id=${logA.logId.slice(0, 20)}... url=${LOG_A_URL}/`);
+console.log(`  Log B: id=${logB.logId.slice(0, 20)}... url=${LOG_B_URL}/`);
 console.log(`  Total operators: ${merged.operators.length}`);
