@@ -3,9 +3,9 @@ services:
   # "attack" is served to the victim (external IP via Caddy).
   # "public" is served to monitors (localhost via Caddy).
   #
-  # Spin up two logs with:
-  #   LOG_KEY_NAME=log-a docker compose -p log-a up -d
-  #   LOG_KEY_NAME=log-b docker compose -p log-b up -d
+  # Start up two logs with:
+  #   LOG_KEY_NAME=log-a ATTACK_PORT=8081 PUBLIC_PORT=8082 docker compose -p log-a up -d
+  #   LOG_KEY_NAME=log-b ATTACK_PORT=8083 PUBLIC_PORT=8084 docker compose -p log-b up -d
 
   attack:
     build: ./compact-log
@@ -14,8 +14,8 @@ services:
     volumes:
       - ./keys:/app/certs:ro
       - attack-data:/data
-    expose:
-      - "8080"
+    ports:
+      - "127.0.0.1:${ATTACK_PORT:?ATTACK_PORT is required}:8080"
 
   public:
     build: ./compact-log
@@ -24,8 +24,8 @@ services:
     volumes:
       - ./keys:/app/certs:ro
       - public-data:/data
-    expose:
-      - "8080"
+    ports:
+      - "127.0.0.1:${PUBLIC_PORT:?PUBLIC_PORT is required}:8080"
 
 volumes:
   attack-data:
