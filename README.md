@@ -37,5 +37,4 @@ The `compact-log/` directory builds CompactLog with two patches applied at build
 docker-compose.yml        # Two services: attack + public
 compact-log/              # Dockerfile + patches for CompactLog
 keys/                     # Log signing keys (gitignored, copied from attack-simulation)
-generate-log-list.mjs     # Generates log-list.json for the proxy/monitor
 ```
