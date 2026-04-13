@@ -1,6 +1,6 @@
 # CT Log
 
-Runs two compromised Certificate Transparency logs for the attack simulation. Each log is a pair of [CompactLog](https://github.com/nickalexeev/compact-log) instances sharing the same signing key:
+Runs two compromised Certificate Transparency logs for the attack simulation. Each log is a pair of [CompactLog](https://github.com/Barre/compact_log.git) instances sharing the same signing key:
 
 - **attack** - served to the victim browser (via Caddy's external route). Contains the rogue certificate.
 - **public** - served to monitors (via Caddy's localhost route). Does not contain the rogue certificate.
